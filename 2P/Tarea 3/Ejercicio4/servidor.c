@@ -21,7 +21,7 @@ int main()
     
     if (fd == -1) 
     {
-       perror("Error opening file for writing");
+       perror("Error opening");
        exit(-1);
     }
 
@@ -30,7 +30,7 @@ int main()
     if (result == -1) 
     {
        close(fd);
-       perror("Error calling lseek() to 'stretch' the file");
+       perror("Error lseek()");
        exit(-1);
     }
  
@@ -39,7 +39,7 @@ int main()
     if (result != 1) 
     {
        close(fd);
-       perror("Error writing last byte of the file");
+       perror("Error writing");
        exit(-1);
     }
 
@@ -50,7 +50,7 @@ int main()
     if (map == MAP_FAILED) 
     {
        close(fd);
-       perror("Error mmapping the file");
+       perror("Error mmapping");
        exit(EXIT_FAILURE);
     }
     
@@ -63,10 +63,12 @@ int main()
     
     if (munmap(map, FILESIZE) == -1) 
     {
-    perror("Error un-mmapping the file");
+    perror("Error un-mmapping");
     }
 
     close(fd);
+    
     free(leido);
+    
     return 0;
 }
