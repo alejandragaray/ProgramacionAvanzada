@@ -1,6 +1,11 @@
+#include <dirent.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <signal.h>
 #include <stdio.h>
-
+#include <sys/stat.h>
 
 void leer();
 
@@ -17,14 +22,24 @@ int main()
 
     sigdelset(&todas, SIGALRM);
 
+    struct sigaction senal;
+    
+    senal.sa_handler = gestor;
+    senal.sa_flags = SA_ONESHOT;
+    
+    if ( sigaction(SIGALRM, &senal, 0) == -1)
+    {
+        printf("Error ");
+        exit(1);
+    }
+    
+    int i;
     for( i= 0; i < 5; ++i)
     {
         printf("\n");
         sleep(10);
         sigpending(&pendientes);
-        
-        if (sigismember(&pendientes, SIGINT))
-            printf("He recibido un Ctrl+C y no lo procesé por estar bloqueada. \n");
+     	
        
         
     }
