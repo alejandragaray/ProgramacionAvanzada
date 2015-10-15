@@ -24,6 +24,8 @@ int main()
 
     struct sigaction senal;
     
+   
+
     senal.sa_handler = gestor;
     senal.sa_flags = SA_ONESHOT;
     
@@ -33,6 +35,7 @@ int main()
         exit(1);
     }
     
+     sigprocmask(SIG_BLOCK, &todas, NULL);
     int i;
     for( i= 0; i < 5; ++i)
     {
