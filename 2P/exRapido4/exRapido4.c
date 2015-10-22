@@ -36,7 +36,7 @@ void* fumador2(void* arg)
     pthread_exit(0);
 }
 
-void* fumador1(void* arg)
+void* fumador3(void* arg)
 {
     pthread_mutex_lock(&mutex_3);
     sleep(5);
