@@ -11,52 +11,99 @@ pthread_mutex_t mutex_3 = PTHREAD_MUTEX_INITIALIZER;
 int elementos[3] = {1,2,3};
 
 //1 = papel, 2 = tabaco, 3 = fosforo
-
+int fumado;
 int elemento = 0;
+int elemento1;
+int elemento2;
+int elemento3;
 
 void* fumador1(void* arg)
 {
-    pthread_mutex_lock(&mutex_1);
-    sleep(5);
-    
     elemento = 1;
-    pthread_mutex_unlock(&mutex_1);
+    
+    if(elemento < elemento2 && elemento < elemento3)
+    {
+        pthread_mutex_lock(&mutex_1);
+        sleep(5);
+        fumado = 1;
+        pthread_mutex_unlock(&mutex_1);
+    }
+    else
+    {
+        fumado = 0;
+    }
+    
     
     pthread_exit(0);
 }
 
 void* fumador2(void* arg)
 {
-    pthread_mutex_lock(&mutex_2);
-    sleep(5);
     elemento = 2;
-	   
-    pthread_mutex_unlock(&mutex_2);
+    
+    if(elemento < elemento3 && elemento < elemento1)
+    {
+        pthread_mutex_lock(&mutex_2);
+        sleep(5);
+        fumado = 1;
+        pthread_mutex_unlock(&mutex_2);
+    }
+    else
+    {
+        fumado = 0;
+    }
     
     pthread_exit(0);
 }
 
 void* fumador3(void* arg)
 {
-    pthread_mutex_lock(&mutex_3);
-    sleep(5);
     elemento = 3;
-	   
-    pthread_mutex_unlock(&mutex_3);
+    
+    if(elemento > elemento2 && elemento > elemento1)
+    {
+        pthread_mutex_lock(&mutex_1);
+        sleep(5);
+        fumado = 1;
+        pthread_mutex_unlock(&mutex_1);
+    }
+    else
+    {
+        fumado = 0;
+    }
     
     pthread_exit(0);
 }
 
 void* agente(void* arg)
 {
-    
-    while (pthread_mutex_trylock(&mutex_1))
+    int i;
+    for(i = 0; i < 100; ++i)
     {
-        pthread_mutex_unlock(&mutex_1);
+        elemento1 = rand()%3;
+        elemento2 = rand()%3;
         
-        pthread_mutex_lock(&mutex_1);
+        while (pthread_mutex_trylock(&mutex_1))
+        {
+            pthread_mutex_unlock(&mutex_1);
+            
+            pthread_mutex_lock(&mutex_1);
+        }
+        
+        while (pthread_mutex_trylock(&mutex_2))
+        {
+            pthread_mutex_unlock(&mutex_2);
+            
+            pthread_mutex_lock(&mutex_2);
+        }
+        
+        while (pthread_mutex_trylock(&mutex_3))
+        {
+            pthread_mutex_unlock(&mutex_3);
+            
+            pthread_mutex_lock(&mutex_3);
+        }
     }
-    
     
     pthread_exit(0);
 }
