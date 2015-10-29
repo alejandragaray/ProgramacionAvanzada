@@ -1,55 +1,98 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
+#include <bits/pthreadtypes.h>
 
-#define COMPLEJOS 2
-#define SALAS 3
-#define TAQUILLAS 2
+#define COMPLEJO 5
+#define SALAS_COMPLEJO 2
+#define CLIENTES 5
+#define ASIENTOS_SALA 2
 
-pthread_mutex_t mutex_s = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t asientos_mutex[COMPLEJO * SALAS_COMPLEJO];
 
-void *web(void *arg)
+int asientos[COMPLEJO * SALAS_COMPLEJO * ASIENTOS_SALA];
+
+void *cliente(void *arg)
 {
-    int id = (int)arg;
+    int id = *(int *) arg;
     
-    
-    pthread_exit(NULL);
-}
-
-void *movil(void *arg)
-{
-    int id = (int)arg;
-    
-    
-    pthread_exit(NULL);
-}
-
-void *presencial(void *arg)
-{
-    int id = (int)arg;
-    
-    
-    pthread_exit(NULL);
+    while (1)
+    {
+        
+        int complejo;
+        int sala;
+        int asiento;
+        int pos;
+        
+        printf("%d - .........\n", id);
+        
+        usleep(rand() % 500000);
+        
+        complejo = rand() % COMPLEJO;
+        printf("%d Selecciono el complejo %d\n", id, complejo);
+        
+        usleep(rand() % 500000);
+        
+        sala = rand() % SALAS_COMPLEJO;
+        printf("%d Selecciono la sala %d\n", id, sala);
+        
+        usleep(rand() % 500000);
+        
+        asiento = rand() % ASIENTOS_SALA;
+        printf("%d Selecciono el asiento %d\n", id, asiento);
+        
+        pos = (complejo * SALAS_COMPLEJO + sala) * ASIENTOS_SALA + asiento;
+        
+        pthread_mutex_lock(&asientos_mutex[pos]);
+        
+        int temp = asientos[pos];
+        if (!temp)
+        {
+            asientos[pos] = 1;
+            
+            printf("%d: Asiento %d lo ocupe\n", id, asiento);
+            
+            pthread_mutex_unlock(&asientos_mutex[pos]);
+            
+            break;
+        }
+        else
+        {
+            printf("%d Asiento %d ocupado\n", id, asiento);
+            
+            pthread_mutex_unlock(&asientos_mutex[pos]);
+        }
+    }
 }
 
 int main()
 {
     srand(time(NULL));
+    
     int i;
     
-    pthread_t web_h;
-    pthread_create(&web_h,NULL,web,NULL);
+    for (i = 0; i < COMPLEJO * SALAS_COMPLEJO * ASIENTOS_SALA; ++i)
+    {
+        pthread_mutex_init(&asientos_mutex[i], NULL);
+        asientos[i] = 0;
+    }
     
-    pthread_t movil_h;
-    pthread_create(&movil_h,NULL,movil,NULL);
+    pthread_t clientes_t[CLIENTES];
+    int ids[CLIENTES];
     
-    pthread_t presencial_h;
-    pthread_create(&presencial_h,NULL,presencial,NULL);
+    for (i = 0; i < CLIENTES; ++i)
+    {
+        ids[i] = i;
+        pthread_create(&clientes_t[i], NULL, cliente, &ids[i]);
+    }
     
-    pthread_join(web_h,NULL);
-    free();
-    return 0;
+    for (i = 0; i < CLIENTES; ++i)
+    {
+        pthread_join(clientes_t[i], NULL);
+    }
+    
+    pthread_exit(NULL);
+    
 }
-
-
 
