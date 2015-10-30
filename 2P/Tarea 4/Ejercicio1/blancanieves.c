@@ -8,89 +8,66 @@
 #define ENANOS 7
 #define SILLAS 4
 
-pthread_mutex_t mutex_b;
-
 pthread_mutex_t mutex_e[ENANOS];
-
+pthread_mutex_t mutex_b;
 pthread_cond_t esperando_turno;
-
 sem_t semaf_s;
 
-void crear_threads(int size, pthread_t *threads, void *(*func)(void *));
+void *blancanieves(void *arg)
+{
+    while (1)
+    {
+        pthread_mutex_lock(&mutex_b);
+        printf("\nCocinando..\n");
+        usleep(rand() % 2000000);
+        pthread_cond_signal(&esperando_turno);
+        printf("Platillo listo\n");
+        printf("Sali a dar una vuelta\n");
+    }
+    pthread_exit(NULL);
+}
 
-void *blancanieves(void *arg);
-
-void *enanito(void *arg);
-
-int ciclo = 1;
+void *enanito(void *arg)
+{
+    int num = *(int *) arg;
+    while (1)
+    {
+        printf("el enanito %i esta en la mina\n", num);
+        usleep(rand() % 2000000);
+        printf("el enanito %i busca donde sentarse\n", num);
+        sem_wait(&semaf_s);
+        printf("el enanito %i encontro lugar\n", num);
+        pthread_mutex_unlock(&mutex_b);
+        pthread_cond_wait(&esperando_turno, &mutex_e[num]);
+        printf("el enanito %i esta comiendo\n", num);
+        usleep(rand() % 2000000);
+        printf("el enanito %i termino\n", num);
+        sem_post(&semaf_s);
+    }
+    pthread_exit(NULL);
+}
 
 int main() {
     srand(time(NULL));
-    
-    pthread_mutex_init(&mutex_b, NULL);
-    
-    pthread_cond_init(&esperando_turno, 0);
-    
     sem_init(&semaf_s, 0, SILLAS);
-    
+    pthread_cond_init(&esperando_turno, 0);
+    pthread_mutex_init(&mutex_b, NULL);
     int i;
     for (i = 0; i < ENANOS; ++i) {
         pthread_mutex_init(&mutex_e[i], NULL);
         pthread_mutex_lock(&mutex_e[i]);
     }
-    
     pthread_t enanito_threads[ENANOS];
-    crear_threads(ENANOS, enanito_threads, enanito);
-    
-    pthread_t blancanieves_t[1];
-    crear_threads(1, blancanieves_t, blancanieves);
-    
+    for (i = 0; i < ENANOS; ++i) {
+        pthread_create(&enanito_threads[i], NULL, enanito, &i);
+    }
+    pthread_t blancanieves_t;
+    pthread_create(&blancanieves_t, NULL, blancanieves, NULL);
     for (i = 0; i < ENANOS; ++i) {
         pthread_join(enanito_threads[i], NULL);
     }
-    
-    pthread_join(blancanieves_t[1], NULL);
-    
+    pthread_join(blancanieves_t, NULL);
     pthread_cond_destroy(&esperando_turno);
     
-    pthread_exit(NULL);
-    
-}
-
-void crear_threads(int size, pthread_t *threads, void *(*func)(void *)) {
-    int i;
-    int ids[size];
-    for (i = 0; i < size; ++i) {
-        ids[i] = i;
-        pthread_create(&threads[i], NULL, func, &ids[i]);
-    }
-}
-
-void *blancanieves(void *arg) {
-    int id = *(int *) arg;
-    while (ciclo) {
-        pthread_mutex_lock(&mutex_b);
-        printf("\nCocinando..\n", id);
-        usleep(rand() % 10000000);
-        printf("Platillo listo\n", id);
-        printf("Sali a dar una vuelta\n", id);
-        pthread_cond_signal(&esperando_turno);
-    }
-}
-
-void *enanito(void *arg) {
-    int id = *(int *) arg;
-    while (ciclo) {
-        printf("el enanito %i esta en la mina\n", id);
-        usleep(rand() % 10000000);
-        printf("el enanito %i busca donde sentarse\n", id);
-        sem_wait(&semaf_s);
-        printf("el enanito %i encontro lugar\n", id);
-        pthread_mutex_unlock(&mutex_b);
-        pthread_cond_wait(&esperando_turno, &mutex_e[id]);
-        printf("el enanito %i esta comiendo\n", id);
-        usleep(rand() % 10000000);
-        printf("el enanito %i termino\n", id);
-        sem_post(&semaf_s);
-    }
+    return 0;
 }
