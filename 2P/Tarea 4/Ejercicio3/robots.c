@@ -34,7 +34,7 @@ int main() {
     for (i = 0; i < NIVELES; ++i) {
         niveles[i].peso_real = 0;
         niveles[i].limite_peso = rand() % 20 + 15;
-        printf("Creating nivel with max peso: %i\n", niveles[i].limite_peso);
+        printf("Creating nivel with max peso: %d\n", niveles[i].limite_peso);
     }
     
     for (i = 0; i < NIVELES; ++i) {
@@ -68,7 +68,7 @@ void *robot(void *arg) {
     int nivel_actual = 0;
     while (ciclo) {
         usleep(rand() % 2000000);
-        printf("El robot %i esta en el nivel %i\n", id, nivel_actual);
+        printf("El robot %d esta en el nivel %d\n", id, nivel_actual);
         if (nivel_actual >= NIVELES) {
             nivel_actual = 0;
         } else {
@@ -82,7 +82,7 @@ void *robot(void *arg) {
 void siguiente_nivel(int id, int nivel, int peso) {
     pthread_mutex_lock(&mutex_lvl[nivel]);
     while (niveles[nivel].peso_real + peso > niveles[nivel].limite_peso) {
-        printf("El robot %i del nivel %i tiene peso de: %i y su limite es: %i) | Mi peso: %i\n",
+        printf("El robot %d del nivel %d tiene peso de: %d y su limite es: %d) | Mi peso: %d\n",
                id,
                nivel,
                niveles[nivel].peso_real,
