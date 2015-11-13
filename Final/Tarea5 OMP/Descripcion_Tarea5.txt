@@ -1,0 +1,20 @@
+Se hizo un ejemplo para las siguientes funciones:
+
+Se encuentra en el archivo omp_set_schedule.c:
+    • omp_set_schedule
+    
+Se encuentra en el archivo omp_get_schedule.c:
+    • omp_get_schedule
+    
+Se encuentra en el archivo omp_get_thread_limit.c, para esta funcion se necesita ejecutar con la variable 
+OMP_THREAD_LIMIT = n ./a.out:
+    • omp_get_thread_limit
+    
+Las siguientes 3 funciones se encuentran en el archivo omp_get_set_max_active_levels.c
+    • omp_set_max_active_levels 
+    • omp_get_max_active_levels 
+    • omp_get_level
+    
+Las siguientes 2 funciones se encuentran en el archivo omp_get_wtime_wtick.c
+    • omp_get_wtime
+    • omp_get_wtick
